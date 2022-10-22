@@ -3,10 +3,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:plants_care/core/constants/app_icons.dart';
 import 'package:plants_care/core/constants/app_styles.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
+import 'package:plants_care/features/base/view_model_provider.dart';
 import 'package:plants_care/features/home/presentation/pages/view/home.dart';
 import 'package:plants_care/features/home/presentation/reusable_components/fittted_text.dart';
+import 'package:plants_care/features/home/presentation/reusable_components/fractionally_icon.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import '../view_models/home_view_model.dart';
 
 class HomeBasePage extends StatefulWidget {
   const HomeBasePage({Key? key}) : super(key: key);
@@ -16,12 +19,54 @@ class HomeBasePage extends StatefulWidget {
 }
 
 class _HomeBasePageState extends State<HomeBasePage> {
-
+  final HomeViewModel homeViewModel = HomeViewModel();
   int currentIndex = 0;
 
   @override
+  void initState() {
+    homeViewModel.start();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    homeViewModel.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            showModalBottomSheet(
+                context: context,
+                isDismissible: false,
+                isScrollControlled: true,
+                constraints: BoxConstraints(
+                  maxHeight: context.height*0.8,
+                  minHeight: context.height*0.8,
+                ),
+                shape: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(context.width*0.05),
+                    topRight: Radius.circular(context.width*0.05)
+                  )
+                ),
+                builder: (context) {
+                  return _BottomSheetContent();
+                },
+            );
+          },
+
+        backgroundColor: AppColors.primaryColor,
+        child: const FractionallyIcon(
+            widthFactor: 0.48,
+            heightFactor: 0.48,
+            color: AppColors.white,
+            icon: FontAwesomeIcons.plus,
+        ),
+      ),
       bottomNavigationBar: _BottomNavBar(
         onTap: (i) {
           setState(() {
@@ -29,16 +74,12 @@ class _HomeBasePageState extends State<HomeBasePage> {
           });
         },
         icons:[
-          AppIcons.waterDrop,
-          AppIcons.search,
-          AppIcons.waterDrop,
-          AppIcons.search,
+          AppIcons.plant,
+          AppIcons.settings,
         ],
         texts:[
-          "item item",
-          "item item",
-          "item item",
-          "item item"
+          "Plants",
+          "Settings",
         ],
         activeColor: AppColors.primaryColor,
         disabledColor: AppColors.grey,
@@ -50,13 +91,39 @@ class _HomeBasePageState extends State<HomeBasePage> {
           index: 0,
 
           children: [
-            Home()
+            ViewModelProvider(
+                viewModel: homeViewModel,
+                child: Home()
+            )
           ],
         ),
       ),
     );
   }
 }
+
+class _BottomSheetContent extends StatelessWidget {
+  const _BottomSheetContent({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height:context.height*0.8,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(context.width*0.05),
+              topRight: Radius.circular(context.width*0.05)
+          )
+      ),
+      child: Column(
+        children: [
+
+        ],
+      ),
+    );
+  }
+}
+
 
 class _BottomNavBar extends StatelessWidget {
   final Function(int) onTap;
@@ -70,7 +137,7 @@ class _BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = context.height*0.095;
+    final height = context.height*0.092;
     final width = context.width;
 
     return Container(
@@ -92,16 +159,22 @@ class _BottomNavBar extends StatelessWidget {
       ),
 
       child: Row(
-        children: List.generate(icons.length, (i){
+        children:[
+          ...List.generate(icons.length, (i){
             return _NavBarItem(
               index: i,
-              textStyle: getBoldTextStyle(),
+              textStyle: currentIndex==i
+                  ? getBoldTextStyle(color: AppColors.primaryColor)
+                  :getBoldTextStyle(color: AppColors.grey),
               icon: icons[i],
               text: texts[i],
-              iconColor:activeColor,
+              iconColor:currentIndex==i? activeColor : disabledColor,
               onTap: onTap,
             );
-          })
+          }).reversed,
+
+          SizedBox(width: width*0.15,),
+        ]
 
       ),
     );
@@ -160,8 +233,6 @@ class _NavBarItem extends StatelessWidget {
                   ),
                 )
               )
-
-
 
             ],
           ),

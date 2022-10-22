@@ -155,7 +155,6 @@ class _BirdLottieState extends State<_BirdLottie> with SingleTickerProviderState
   }
 }
 
-
 class _SearchBar extends StatelessWidget {
   const _SearchBar({Key? key}) : super(key: key);
 

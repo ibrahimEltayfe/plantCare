@@ -43,10 +43,6 @@ class _HomeBasePageState extends State<HomeBasePage> {
                 context: context,
                 isDismissible: false,
                 isScrollControlled: true,
-                constraints: BoxConstraints(
-                  maxHeight: context.height*0.8,
-                  minHeight: context.height*0.8,
-                ),
                 shape: OutlineInputBorder(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(context.width*0.05),
@@ -109,6 +105,7 @@ class _BottomSheetContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height:context.height*0.8,
+      width: context.width,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(context.width*0.05),

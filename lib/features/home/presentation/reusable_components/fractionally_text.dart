@@ -9,16 +9,12 @@ class FractionallyText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-          width: widthFactor,
-          height: heightFactor,
-          child: Center(
-            child: FittedBox(
-                child: Text(text,style: textStyle)
-            ),
-          )
-      ),
+    return SizedBox(
+        width: widthFactor,
+        height: heightFactor,
+        child: FittedBox(
+            child: Text(text,style: textStyle)
+        )
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FittedIcon extends StatelessWidget {
   final double height;
@@ -12,10 +13,8 @@ class FittedIcon extends StatelessWidget {
     return SizedBox(
         width: width,
         height: height,
-        child: Center(
-          child: FittedBox(
-              child: Icon(icon,color: color)
-          ),
+        child: FittedBox(
+            child: FaIcon(icon,color: color)
         )
     );
   }

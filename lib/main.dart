@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'features/home/presentation/pages/view/home.dart';
+import 'package:plants_care/features/home/presentation/pages/view/home_base.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,8 +11,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner:false,
       title: 'Plants Care',
-      home: Home(),
+      home: HomeBasePage(),
     );
   }
 }

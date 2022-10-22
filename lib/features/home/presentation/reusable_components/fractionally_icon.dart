@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FractionallyIcon extends StatelessWidget {
   final double heightFactor;
@@ -12,10 +13,8 @@ class FractionallyIcon extends StatelessWidget {
     return FractionallySizedBox(
         widthFactor: widthFactor,
         heightFactor: heightFactor,
-        child: Center(
-          child: FittedBox(
-              child: Icon(icon,color: color)
-          ),
+        child: FittedBox(
+            child: FaIcon(icon,color: color)
         )
     );
   }

@@ -59,3 +59,16 @@ ButtonStyle getBorderedButtonStyle({required Color bgColor,required double radiu
       elevation: MaterialStateProperty.all(0)
   );
 }
+
+ButtonStyle getDialogButtonStyle(bool isAllow){
+  return ButtonStyle(
+      backgroundColor: MaterialStateProperty.all<Color>(isAllow?AppColors.primaryColor:AppColors.lightGrey),
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide.none
+          )
+      ),
+      elevation: MaterialStateProperty.all(0)
+  );
+}

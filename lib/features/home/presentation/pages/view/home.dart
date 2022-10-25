@@ -1,18 +1,19 @@
 import 'dart:developer';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:plants_care/core/constants/app_colors.dart';
 import 'package:plants_care/core/constants/app_strings.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
 import 'package:plants_care/core/extensions/view_model_provider.dart';
-import 'package:plants_care/features/base/view_model_provider.dart';
+import 'package:plants_care/core/utils/notification_helper.dart';
 import 'package:plants_care/features/home/presentation/pages/view_models/home_view_model.dart';
-import 'package:plants_care/features/home/presentation/reusable_components/fitted_icon.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/constants/app_styles.dart';
-import '../../reusable_components/fittted_text.dart';
-import '../../reusable_components/fractionally_icon.dart';
+import '../../../../reusable_components/fitted_icon.dart';
+import '../../../../reusable_components/fittted_text.dart';
+import '../../../../reusable_components/fractionally_icon.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -24,6 +25,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final ScrollController scrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
+
+
   @override
   void initState() {
   scrollController.addListener(() {
@@ -63,49 +66,7 @@ class _HomeState extends State<Home> {
                   ],
                 ),
 
-                StreamBuilder(
-                  stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
-                  builder: (ctx,AsyncSnapshot<double> snapshot){
-                    double? val = snapshot.data;
-
-                    if(val == null || val <= 3){
-                      return const SizedBox.shrink();
-                    }
-                    double top = context.height*0.115 - val;
-                    double right = context.height * 0.026 - val;
-
-                    if(top <= context.height*0.027){
-                      top = context.height*0.027;
-                    }
-
-                    if(right <= 0){
-                      right = 0;
-                    }
-
-                    return Positioned(
-                      top: top,
-                      right: right,
-                      child: GestureDetector(
-                        onTap: () {
-                            scrollController.animateTo(
-                              0,
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.ease
-                           ).whenComplete((){
-                             context.getViewModel<HomeViewModel>().searchFieldRequestFocus();
-                           });
-                        },
-                        child: FittedIcon(
-                          width: context.width*0.104,
-                          height: context.height * 0.032,
-                          color: AppColors.primaryColor,
-                          icon: AppIcons.search,
-                        ),
-                      ),
-                    );
-                  },
-
-                ),
+                _ParallaxSearchIcon(scrollController: scrollController,),
 
                 Positioned(
                   left: -context.width*0.03,
@@ -116,6 +77,57 @@ class _HomeState extends State<Home> {
 
             ),
           );
+  }
+}
+class _ParallaxSearchIcon extends StatelessWidget {
+  final ScrollController scrollController;
+  const _ParallaxSearchIcon({Key? key, required this.scrollController}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
+      builder: (ctx,AsyncSnapshot<double> snapshot){
+        double? val = snapshot.data;
+
+        if(val == null || val <= 3){
+          return const SizedBox.shrink();
+        }
+        double top = context.height*0.115 - val;
+        double right = context.height * 0.026 - val;
+
+        if(top <= context.height*0.027){
+          top = context.height*0.027;
+        }
+
+        if(right <= 0){
+          right = 0;
+        }
+
+        return Positioned(
+          top: top,
+          right: right,
+          child: GestureDetector(
+            onTap: () {
+              scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.ease
+              ).whenComplete((){
+                context.getViewModel<HomeViewModel>().searchFieldRequestFocus();
+              });
+            },
+            child: FittedIcon(
+              width: context.width*0.104,
+              height: context.height * 0.032,
+              color: AppColors.primaryColor,
+              icon: AppIcons.search,
+            ),
+          ),
+        );
+      },
+
+    );
   }
 }
 
@@ -175,8 +187,12 @@ class _SearchBar extends StatelessWidget {
             ]
         ),
         child: TextField(
+          textInputAction: TextInputAction.done,
+          expands: true,
+          maxLines: null,
           style: getRegularTextStyle(),
           focusNode: context.getViewModel<HomeViewModel>().focusNode,
+          textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
             suffixIcon: StreamBuilder(
                 stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
@@ -374,5 +390,4 @@ class _PlantCard extends StatelessWidget {
     );
   }
 }
-
 

@@ -80,7 +80,6 @@ class NotificationHelper {
       int id
    ) async {
 
-    log(id.toString());
     try{
       await AwesomeNotifications().createNotification(
           /*schedule: NotificationCalendar(
@@ -92,7 +91,7 @@ class NotificationHelper {
             repeats: true,
           ),*/
         schedule: NotificationInterval(
-            interval: (dateTime.day * 24)+(dateTime.hour*60)+(dateTime.minute*60),
+            interval: ((dateTime.day * 24)+(dateTime.hour*60)+(dateTime.minute*60)),
             repeats: true,
             timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier()
         ),

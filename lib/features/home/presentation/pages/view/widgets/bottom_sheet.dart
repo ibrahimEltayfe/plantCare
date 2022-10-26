@@ -191,7 +191,7 @@ class _BuildReminderTimeFields extends StatelessWidget {
                   return "Value can not be empty";
                 }
 
-                return null;
+                  return null;
               },
             ),
           ),
@@ -229,6 +229,13 @@ class _BuildReminderTimeFields extends StatelessWidget {
               validator: (value){
                 if(value == null || value.trim() == "") {
                   return "Value can not be empty";
+                }
+
+                if(int.parse(value) <= 0
+                    && int.parse(dayController.text) <= 0
+                    && int.parse(hourController.text) <= 0
+                ){
+                  return 'error';
                 }
 
                 return null;

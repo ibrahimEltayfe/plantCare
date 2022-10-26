@@ -56,12 +56,12 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
               Fluttertoast.showToast(msg: failure.message);
             },
             (result){
-              //set notification
-              NotificationHelper.createScheduledNotification(
+              //todo:set notification
+              /*NotificationHelper.createScheduledNotification(
                   plantModel.plantName??'plant name',
                   DateTime.fromMillisecondsSinceEpoch(plantModel.waterTime??0),
                   notificationId
-              );
+              );*/
               log(result.toString());
             }
     );

@@ -91,6 +91,7 @@ class NotificationHelper {
             repeats: true,
           ),*/
         schedule: NotificationInterval(
+            //todo:modify this
             interval: ((dateTime.day * 24)+(dateTime.hour*60)+(dateTime.minute*60)),
             repeats: true,
             timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier()

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:lottie/lottie.dart';
 import 'package:plants_care/core/constants/app_colors.dart';
 import 'package:plants_care/core/constants/app_strings.dart';
@@ -30,9 +31,12 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
   scrollController.addListener(() {
-      context.getViewModel<HomeViewModel>().animatedSearchIconInput.add(
-          scrollController.position.pixels
-      );
+    if(scrollController.position.pixels > context.height*0.03){
+      return;
+    }
+    context.getViewModel<HomeViewModel>().animatedSearchIconInput.add(
+        scrollController.position.pixels
+    );
     });
     super.initState();
   }
@@ -52,6 +56,7 @@ class _HomeState extends State<Home> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(height: context.height*0.01,),
                     FittedText(
                       height: context.height*0.075,
                       width: context.width*0.4,
@@ -60,9 +65,26 @@ class _HomeState extends State<Home> {
                       text: AppStrings.myPlants,
                     ),
 
-                     SizedBox(height:context.height*0.005,),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Column(
+                          children: [
+                            SizedBox(height:context.height*0.01,),
+                            _SearchBar(),
 
-                    _PlantCardsList(scrollController: scrollController,)
+                            SizedBox(height:context.height*0.026,),
+                            ...List.generate(
+                                10,
+                                (index){
+                                  return _PlantCard();
+                                }
+                             )
+                          ],
+                        ),
+                      ),
+                    )
+
                   ],
                 ),
 
@@ -79,6 +101,8 @@ class _HomeState extends State<Home> {
           );
   }
 }
+
+
 class _ParallaxSearchIcon extends StatelessWidget {
   final ScrollController scrollController;
   const _ParallaxSearchIcon({Key? key, required this.scrollController}) : super(key: key);
@@ -174,7 +198,7 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         width: context.width*0.92,
-        height: context.height * 0.08,
+        height: context.height * 0.09,
         decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(15),
@@ -229,39 +253,6 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-//plant cards listview
-class _PlantCardsList extends StatelessWidget {
-  final ScrollController scrollController;
-  const _PlantCardsList({super.key, required this.scrollController});
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.separated(
-        controller: scrollController,
-        itemCount: 4,
-        separatorBuilder: (context, index) => SizedBox(height: context.height*0.03,),
-        itemBuilder: (context, index) {
-          if(index == 0){
-            return Column(
-              children: [
-                 SizedBox(height:context.height*0.01,),
-                _SearchBar(),
-                 SizedBox(height:context.height*0.026,),
-                _PlantCard()
-              ],
-            );
-          }else{
-            return _PlantCard();
-          }
-
-        },
-      ),
-    );
-  }
-}
-
 class _PlantCard extends StatelessWidget {
   const _PlantCard({Key? key}) : super(key: key);
 
@@ -270,124 +261,224 @@ class _PlantCard extends StatelessWidget {
     final width = context.width;
     final height = context.height*0.222;
 
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-                color: AppColors.lightGrey,
-                blurRadius: 6,
-                offset: Offset(0,context.height*0.01)
-            )
-          ]
-      ),
-      padding: EdgeInsets.symmetric(horizontal: context.width*0.032,vertical: context.height*0.025),
-      child: Row(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: width*0.7,
-                height: height,
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //name
-                    FittedText(
-                      height: height*0.12,
-                      width:width*0.7,
-                      alignment: Alignment.centerLeft,
-                      textStyle: getBoldTextStyle(),
-                      text: 'Item Name Name ...',
-                    ),
-
-                    SizedBox(height: height*0.012,),
-
-                    //desc
-                    FittedText(
-                        height: height*0.1,
+    return Padding(
+      padding: EdgeInsets.only(bottom: context.height*0.03),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                  color: AppColors.lightGrey,
+                  blurRadius: 6,
+                  offset: Offset(0,context.height*0.01)
+              )
+            ]
+        ),
+        padding: EdgeInsets.symmetric(horizontal: context.width*0.032,vertical: context.height*0.025),
+        child: Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: width*0.7,
+                  height: height,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      //name
+                      FittedText(
+                        height: height*0.12,
                         width:width*0.7,
-                        text: 'Item Place ...',
                         alignment: Alignment.centerLeft,
-                        textStyle: getRegularTextStyle()
-                    ),
-
-                    const Spacer(),
-
-                    //button
-                    SizedBox(
-                      width: width*0.3,
-                      height: height*0.18,
-                      child: ElevatedButton(
-                          onPressed: (){},
-                          style: getRegularButtonStyle(bgColor: AppColors.lightBlue, radius: 15),
-                          child: LayoutBuilder(
-                              builder: (context,btnSize) {
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    //icon
-                                    Expanded(
-                                      flex:1,
-                                      child: Align(
-                                        alignment:Alignment.centerLeft,
-                                        child: FittedIcon(
-                                          width: btnSize.maxWidth*0.12,
-                                          height:  btnSize.maxHeight*0.7,
-                                          color: AppColors.blue,
-                                          icon: AppIcons.waterDrop,
-                                        ),
-                                      ),
-                                    ),
-
-
-                                    //text
-                                    Expanded(
-                                      flex:3,
-                                      child: Align(
-                                        alignment:Alignment.centerLeft,
-                                        child: FittedText(
-                                          width: btnSize.maxWidth*0.74,
-                                          height:  btnSize.maxHeight*0.95,
-                                          textStyle: getBoldTextStyle(color: AppColors.blue),
-                                          text: "in 22 days",
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-                          )
+                        textStyle: getBoldTextStyle(),
+                        text: 'Item Name Name ...',
                       ),
-                    ),
 
-                  ],
+                      SizedBox(height: height*0.012,),
+
+                      //desc
+                      FittedText(
+                          height: height*0.1,
+                          width:width*0.7,
+                          text: 'Item Place ...',
+                          alignment: Alignment.centerLeft,
+                          textStyle: getRegularTextStyle()
+                      ),
+
+                      const Spacer(),
+
+                      //button
+                      SizedBox(
+                        width: width*0.3,
+                        height: height*0.18,
+                        child: ElevatedButton(
+                            onPressed: (){},
+                            style: getRegularButtonStyle(bgColor: AppColors.lightBlue, radius: 15),
+                            child: LayoutBuilder(
+                                builder: (context,btnSize) {
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      //icon
+                                      Expanded(
+                                        flex:1,
+                                        child: Align(
+                                          alignment:Alignment.centerLeft,
+                                          child: FittedIcon(
+                                            width: btnSize.maxWidth*0.12,
+                                            height:  btnSize.maxHeight*0.7,
+                                            color: AppColors.blue,
+                                            icon: AppIcons.waterDrop,
+                                          ),
+                                        ),
+                                      ),
+
+
+                                      //text
+                                      Expanded(
+                                        flex:3,
+                                        child: Align(
+                                          alignment:Alignment.centerLeft,
+                                          child: FittedText(
+                                            width: btnSize.maxWidth*0.74,
+                                            height:  btnSize.maxHeight*0.95,
+                                            textStyle: getBoldTextStyle(color: AppColors.blue),
+                                            text: "in 22 days",
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                            )
+                        ),
+                      ),
+
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          SizedBox(width: width*0.005,),
+            SizedBox(width: width*0.005,),
 
-          //image
-          Expanded(
-            child: Align(
-              alignment: Alignment.topRight,
-              child: SizedBox(
-                  width: width*0.3,
-                  height: height,
-                  child: Placeholder()
+            //image
+            Expanded(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: SizedBox(
+                    width: width*0.3,
+                    height: height,
+                    child: Placeholder()
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
 }
 
+
+//using sliver
+/*CustomScrollView(
+                  controller: scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: context.height*0.01,),
+                    ),
+                    SliverPersistentHeader(
+                        pinned: true,
+                        delegate:PersistenceHeader(context.height*0.075)
+                    ),
+
+                    SliverAppBar(
+                      floating: false,
+                      pinned: false,
+                      backgroundColor: AppColors.bgColor,
+                      bottom: PreferredSize(
+                        preferredSize: Size(context.width,context.height*0.06),
+                        child: Column(
+                          children: [
+                            SizedBox(height:context.height*0.01,),
+                            _SearchBar(),
+                            SizedBox(height:context.height*0.026,),
+                          ],
+                        ),
+                      ) ,
+
+                    ),
+
+                    _PlantCardsList(scrollController: scrollController),
+                  ],
+                ),*/
+
+
+/*
+class PersistenceHeader extends SliverPersistentHeaderDelegate{
+  final double extent;
+  const PersistenceHeader(this.extent, {Key? key});
+
+  @override
+  Widget build(BuildContext context ,double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: AppColors.bgColor,
+      child: FittedText(
+        width: double.infinity,
+        height: double.infinity,
+        textStyle: getBoldTextStyle(color: AppColors.primaryColor),
+        alignment: Alignment.centerLeft,
+        text: AppStrings.myPlants,
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => extent;
+
+  @override
+  double get minExtent => extent;
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
+  }
+}
+
+//plant cards listview
+class _PlantCardsList extends StatelessWidget {
+  final ScrollController scrollController;
+  const _PlantCardsList({super.key, required this.scrollController});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverList(
+     delegate: SliverChildBuilderDelegate(
+
+      (_, int index) {
+       return _PlantCard();
+      },
+      childCount: 20,
+    )
+    );
+   /* return SizedBox(
+      height: 400,
+      width: 400,
+      child: ListView.separated(
+        controller: scrollController,
+        itemCount: 4,
+        separatorBuilder: (context, index) => SizedBox(height: context.height*0.03,),
+        itemBuilder: (context, index) {
+            return _PlantCard();
+        },
+      ),
+    );*/
+  }
+}
+*/

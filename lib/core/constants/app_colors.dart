@@ -20,4 +20,5 @@ class AppColors{
   static const Color semiBlack = Color(0xFF575555);
 
   static const Color darkRed = Color(0xFFAC0000);
+  static const Color lightRed = Color(0xFFff8886);
 }

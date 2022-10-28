@@ -8,6 +8,7 @@ import 'package:plants_care/features/home/domain/repositories/local_db_repositor
 import '../../../../../core/constants/app_strings.dart';
 import '../../../../../core/utils/notification_helper.dart';
 import '../../../../../core/utils/shared_pref_helper.dart';
+import '../../../domain/entities/plant_entity.dart';
 
 class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModelOutputs{
   final LocalPlantsRepository localPlantsRepository;
@@ -16,18 +17,21 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   FocusNode focusNode = FocusNode();
   StreamController<double> animatedSearchIconController = StreamController.broadcast();
   StreamController<FocusNode> searchFieldFocusNodeController = StreamController();
+  StreamController<List<PlantEntity>> plantsController = StreamController();
 
   //public functions
   @override
   void start() {
     animatedSearchIconInput.add(0.0);
     searchFieldFocusNodeInput.add(focusNode);
+    plantsController.add([]);
   }
 
   @override
   void dispose() {
     animatedSearchIconController.close();
     searchFieldFocusNodeController.close();
+    plantsController.close();
   }
 
   void searchFieldRequestFocus(){
@@ -56,14 +60,31 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
               Fluttertoast.showToast(msg: failure.message);
             },
             (result){
-              //todo:set notification
-              /*NotificationHelper.createScheduledNotification(
-                  plantModel.plantName??'plant name',
+              NotificationHelper.createScheduledNotification(
+                  plantModel.plantName??'no name',
                   DateTime.fromMillisecondsSinceEpoch(plantModel.waterTime??0),
                   notificationId
-              );*/
+              );
+              getAllPlants();
               log(result.toString());
             }
+    );
+  }
+
+  Future<void> getAllPlants() async{
+
+    final insertPlant = await localPlantsRepository.getAllRecords();
+
+    insertPlant.fold(
+       (failure){
+          log("From getPlants failure");
+
+          plantsController.addError(failure.message);
+        },
+       (result){
+          plantsInput.add(result);
+          log("get plants : $result");
+        }
     );
   }
 
@@ -96,6 +117,9 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
 
   @override
   Sink<FocusNode> get searchFieldFocusNodeInput => searchFieldFocusNodeController.sink;
+
+  Sink<List<PlantEntity>> get plantsInput => plantsController.sink;
+
   //outputs
   @override
   Stream<double> get animatedSearchIconOutput => animatedSearchIconController.stream;
@@ -103,14 +127,19 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   @override
   Stream<FocusNode> get searchFieldFocusNodeOutput => searchFieldFocusNodeController.stream;
 
+  @override
+  Stream<List<PlantEntity>> get plantsOutput => plantsController.stream;
+
 }
 
 abstract class HomeViewModelInputs{
   Sink<double> get animatedSearchIconInput;
   Sink<FocusNode> get searchFieldFocusNodeInput;
+  Sink<List<PlantEntity>> get plantsInput;
 }
 
 abstract class HomeViewModelOutputs{
   Stream<double> get animatedSearchIconOutput;
   Stream<FocusNode> get searchFieldFocusNodeOutput;
+  Stream<List<PlantEntity>> get plantsOutput;
 }

@@ -5,6 +5,7 @@ class ViewModelProvider extends InheritedWidget{
   final dynamic viewModel;
   const ViewModelProvider({super.key, required super.child,required this.viewModel});
 
+
   static ViewModelProvider of(BuildContext context){
     return context.dependOnInheritedWidgetOfExactType<ViewModelProvider>()!;
   }

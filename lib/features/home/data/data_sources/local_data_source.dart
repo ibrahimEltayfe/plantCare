@@ -36,6 +36,7 @@ class LocalDataSource{
 
   Future<List<Map<String,dynamic>>> getAllRecords() async{
     List<Map<String,dynamic>> list = await database.rawQuery('SELECT * FROM $_plantsTable');
+    log(list.toString());
     return list;
   }
 

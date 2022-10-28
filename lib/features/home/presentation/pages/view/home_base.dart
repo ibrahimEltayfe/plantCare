@@ -1,7 +1,3 @@
-import 'dart:developer';
-import 'dart:io';
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:plants_care/core/constants/app_icons.dart';
@@ -31,58 +27,51 @@ class _HomeBasePageState extends State<HomeBasePage> {
   void initState() {
     NotificationHelper.checkPermission(context);
 
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: (receivedAction) async{
-        if(!Platform.isIOS) {
-          await AwesomeNotifications().setGlobalBadgeCounter(0);
-        }
-      },
-      onDismissActionReceivedMethod: (receivedAction) async{
-        await AwesomeNotifications().setGlobalBadgeCounter(0);
-      },
-    );
     super.initState();
   }
 
   @override
   void dispose() {
-    di.injector<HomeViewModel>().dispose();
     //AwesomeNotifications().dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgColor,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: const _FloatingActionButton(),
+    return ViewModelProvider(
+      viewModel: di.injector<HomeViewModel>()..start()..getAllPlants(),
 
-      bottomNavigationBar: _BottomNavBar(
-        icons:const [
-          AppIcons.plant,
-          AppIcons.settings,
-        ],
-        texts:const [
-          "Plants",
-          "Settings",
-        ],
-        activeColor: AppColors.primaryColor,
-        disabledColor: AppColors.grey,
-        currentIndex:currentIndex,
-        onTap: (i) {
-          setState(() {
-            currentIndex = i;
-          });
-        },
-      ),
-      body: SafeArea(
-        child: IndexedStack(
-          index: 0,
+      child: Scaffold(
+        backgroundColor: AppColors.bgColor,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const _FloatingActionButton(),
 
-          children: [
-            Home()
+        bottomNavigationBar: _BottomNavBar(
+          icons:const [
+            AppIcons.plant,
+            AppIcons.settings,
           ],
+          texts:const [
+            "Plants",
+            "Settings",
+          ],
+          activeColor: AppColors.primaryColor,
+          disabledColor: AppColors.grey,
+          currentIndex:currentIndex,
+          onTap: (i) {
+            setState(() {
+              currentIndex = i;
+            });
+          },
+        ),
+        body: SafeArea(
+          child: IndexedStack(
+            index: 0,
+
+            children: [
+              Home()
+            ],
+          ),
         ),
       ),
     );
@@ -106,8 +95,8 @@ class _FloatingActionButton extends StatelessWidget {
                   topRight: Radius.circular(context.width*0.05)
               )
           ),
-          builder: (context) {
-            return BottomSheetContent();
+          builder: (ctx) {
+            return BottomSheetContent(homeViewModel: context.getViewModel<HomeViewModel>(),);
           },
         );
       },

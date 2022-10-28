@@ -39,20 +39,22 @@ class InputTextField extends StatelessWidget {
 
           cursorColor: AppColors.primaryColor,
           textInputAction: textInputAction,
-          expands: true,
-          maxLines: null,
+
           keyboardType: keyboardType,
           textAlign: textAlign ?? TextAlign.left,
           textAlignVertical: TextAlignVertical.center,
           style: getRegularTextStyle(color: AppColors.primaryColor),
+          expands:true,
+          maxLines: null,
 
           decoration: InputDecoration(
+            isDense:true,
             prefixIcon: (icon!=null) ?FractionallyIcon(
-              widthFactor: 0.2,
-              heightFactor: 0.4,
-              color: activeColor,
-              icon: icon!
-             ):null,
+                widthFactor: 0.2,
+                heightFactor: 0.4,
+                color: activeColor,
+                icon: icon!
+            ):null,
 
             hintText:hint,
             hintStyle: getRegularTextStyle(color: AppColors.grey),
@@ -73,9 +75,9 @@ class InputTextField extends StatelessWidget {
             ),
 
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: AppColors.darkRed)
-        ),
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: AppColors.darkRed)
+            ),
           ),
         )
     );

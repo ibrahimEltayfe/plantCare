@@ -5,14 +5,17 @@ class FractionallyText extends StatelessWidget {
   final double widthFactor;
   final String text;
   final TextStyle textStyle;
-  const FractionallyText({Key? key, required this.heightFactor, required this.widthFactor, required this.text, required this.textStyle, }) : super(key: key);
+  final Alignment? alignment;
+  const FractionallyText({Key? key, required this.heightFactor, required this.widthFactor, required this.text, required this.textStyle, this.alignment, }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        width: widthFactor,
-        height: heightFactor,
+    return FractionallySizedBox(
+        alignment: alignment ?? Alignment.centerLeft ,
+        widthFactor: widthFactor,
+        heightFactor: heightFactor,
         child: FittedBox(
+            alignment: alignment ?? Alignment.centerLeft,
             child: Text(text,style: textStyle)
         )
     );

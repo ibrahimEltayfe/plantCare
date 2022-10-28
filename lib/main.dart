@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:plants_care/core/utils/injector.dart' as di;
@@ -17,6 +18,8 @@ void main() async{
   di.init();
   await SharedPrefHelper.initialize();
   await NotificationHelper.initialize();
+  final a = await AwesomeNotifications().getLocalTimeZoneIdentifier();
+  log(a);
   await di.injector<LocalDataSource>().openDB();
 
   await SystemChrome.setPreferredOrientations([
@@ -31,14 +34,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelProvider(
-      viewModel: di.injector<HomeViewModel>(),
-
-      child: MaterialApp(
-        debugShowCheckedModeBanner:false,
-        title: 'Plants Care',
-        home: HomeBasePage(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner:false,
+      title: 'Plants Care',
+      home: HomeBasePage(),
     );
   }
 }

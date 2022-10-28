@@ -1,6 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:plants_care/core/constants/app_errors.dart';
 import 'package:plants_care/core/error/exception_handler.dart';

@@ -90,11 +90,16 @@ class NotificationHelper {
             millisecond: 0,
             repeats: true,
           ),*/
-        schedule: NotificationInterval(
-            //todo:modify this
-            interval: ((dateTime.day * 24)+(dateTime.hour*60)+(dateTime.minute*60)),
-            repeats: true,
-            timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier()
+        schedule: NotificationCalendar(
+            year: dateTime.year,
+            day: dateTime.day,
+            hour: dateTime.hour,
+            month: dateTime.month,
+            minute: dateTime.minute,
+            second: 0,
+            millisecond: 0,
+
+            repeats: false,
         ),
           actionButtons: [
             NotificationActionButton(
@@ -104,6 +109,7 @@ class NotificationHelper {
             )
           ],
           content: NotificationContent(
+            category:NotificationCategory.Reminder ,
             id: id,
             channelKey: AppStrings.scheduledChannel,
             title: '${Emojis.plant_seedling}$plantName wants water ${Emojis.tool_water_pistol}',

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
 import 'package:plants_care/core/extensions/view_model_provider.dart';
+import 'package:plants_care/features/base/view_model_provider.dart';
 import 'package:plants_care/features/home/data/models/plant_model.dart';
 import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
 import 'package:plants_care/features/home/presentation/pages/view_models/home_view_model.dart';
@@ -14,7 +15,8 @@ import '../../../../../../core/utils/notification_helper.dart';
 import 'input_text_field.dart';
 
 class BottomSheetContent extends StatefulWidget {
-  const BottomSheetContent({super.key});
+  final HomeViewModel homeViewModel;
+  const BottomSheetContent({super.key, required this.homeViewModel});
 
   @override
   State<BottomSheetContent> createState() => _BottomSheetContentState();
@@ -106,7 +108,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                         waterTime: waterTime.millisecondsSinceEpoch
                     );
 
-                    await context.getViewModel<HomeViewModel>().addPlant(plantModel);
+                    await widget.homeViewModel.addPlant(plantModel);
 
                   }
                 },

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -35,6 +37,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     dayController = TextEditingController();
     hourController = TextEditingController();
     minuteController = TextEditingController();
+    widget.homeViewModel.addPlantLoadingInput.add(false);
     super.initState();
   }
 
@@ -91,6 +94,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
 
               SizedBox(height: context.height*0.045,),
               _AddPlantButton(
+                homeViewModel: widget.homeViewModel,
                 onTap: () async{
                   if(formKey.currentState!.validate()){
 
@@ -125,7 +129,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
 /* Add Plant Button */
 class _AddPlantButton extends StatelessWidget {
   final VoidCallback onTap;
-  const _AddPlantButton({Key? key, required this.onTap}) : super(key: key);
+  final HomeViewModel homeViewModel;
+  const _AddPlantButton({Key? key, required this.onTap, required this.homeViewModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -135,11 +140,21 @@ class _AddPlantButton extends StatelessWidget {
       child: ElevatedButton(
           style: getRegularButtonStyle(bgColor: AppColors.primaryColor, radius: 15),
           onPressed: onTap,
-          child: FittedText(
-            width: context.width*0.26,
-            height: context.height*0.06,
-            textStyle: getBoldTextStyle(color: AppColors.white),
-            text: AppStrings.addPlant,
+          child: StreamBuilder(
+            stream: homeViewModel.addPlantLoadingOutput,
+            builder: (context, snapshot) {
+              log(snapshot.data.toString());
+              if(snapshot.data == null || snapshot.data == true){
+                return const Center(child: CircularProgressIndicator(color: AppColors.white,));
+              }
+                return FittedText(
+                  width: context.width*0.26,
+                  height: context.height*0.06,
+                  textStyle: getBoldTextStyle(color: AppColors.white),
+                  text: AppStrings.addPlant,
+                );
+
+            },
           )
       ),
     );

@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:plants_care/features/base/base_view_model.dart';
 import 'package:plants_care/features/home/data/models/plant_model.dart';
 import 'package:plants_care/features/home/domain/repositories/local_db_repository.dart';
+import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_strings.dart';
 import '../../../../../core/utils/notification_helper.dart';
 import '../../../../../core/utils/shared_pref_helper.dart';
@@ -18,6 +19,7 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   StreamController<double> animatedSearchIconController = StreamController.broadcast();
   StreamController<FocusNode> searchFieldFocusNodeController = StreamController();
   StreamController<List<PlantEntity>> plantsController = StreamController();
+  StreamController<bool> addPlantLoadingController = StreamController();
 
   //public functions
   @override
@@ -25,6 +27,7 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
     animatedSearchIconInput.add(0.0);
     searchFieldFocusNodeInput.add(focusNode);
     plantsController.add([]);
+    addPlantLoadingController.add(false);
   }
 
   @override
@@ -32,6 +35,7 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
     animatedSearchIconController.close();
     searchFieldFocusNodeController.close();
     plantsController.close();
+    addPlantLoadingController.close();
   }
 
   void searchFieldRequestFocus(){
@@ -39,6 +43,7 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   }
 
   Future<void> addPlant(PlantModel plantModel) async{
+    addPlantLoadingInput.add(true);
 
     final notificationId = await _getNotificationId();
 
@@ -66,9 +71,17 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
                   notificationId
               );
               getAllPlants();
-              log(result.toString());
+              Fluttertoast.showToast(
+                  msg: AppStrings.plantAdded,
+                  backgroundColor: AppColors.green,
+                  textColor: AppColors.white,
+
+              );
+
             }
     );
+    addPlantLoadingInput.add(false);
+
   }
 
   Future<void> getAllPlants() async{
@@ -83,7 +96,6 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
         },
        (result){
           plantsInput.add(result);
-          log("get plants : $result");
         }
     );
   }
@@ -118,7 +130,11 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   @override
   Sink<FocusNode> get searchFieldFocusNodeInput => searchFieldFocusNodeController.sink;
 
+  @override
   Sink<List<PlantEntity>> get plantsInput => plantsController.sink;
+
+  @override
+  Sink<bool> get addPlantLoadingInput => addPlantLoadingController.sink;
 
   //outputs
   @override
@@ -130,16 +146,23 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   @override
   Stream<List<PlantEntity>> get plantsOutput => plantsController.stream;
 
+  @override
+  Stream<bool> get addPlantLoadingOutput => addPlantLoadingController.stream;
+
 }
 
 abstract class HomeViewModelInputs{
   Sink<double> get animatedSearchIconInput;
   Sink<FocusNode> get searchFieldFocusNodeInput;
   Sink<List<PlantEntity>> get plantsInput;
+  Sink<bool> get addPlantLoadingInput;
+
 }
 
 abstract class HomeViewModelOutputs{
   Stream<double> get animatedSearchIconOutput;
   Stream<FocusNode> get searchFieldFocusNodeOutput;
   Stream<List<PlantEntity>> get plantsOutput;
+  Stream<bool> get addPlantLoadingOutput;
+
 }

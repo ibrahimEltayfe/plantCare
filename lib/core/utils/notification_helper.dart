@@ -82,14 +82,6 @@ class NotificationHelper {
 
     try{
       await AwesomeNotifications().createNotification(
-          /*schedule: NotificationCalendar(
-            day: dateTime.day,
-            hour: dateTime.hour,
-            minute: dateTime.minute,
-            second: 0,
-            millisecond: 0,
-            repeats: true,
-          ),*/
         schedule: NotificationCalendar(
             year: dateTime.year,
             day: dateTime.day,

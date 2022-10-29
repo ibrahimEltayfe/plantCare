@@ -10,16 +10,13 @@ import 'package:plants_care/features/base/view_model_provider.dart';
 import 'package:plants_care/features/home/data/data_sources/local_data_source.dart';
 import 'package:plants_care/features/home/presentation/pages/view/home_base.dart';
 
-import 'features/home/presentation/pages/view_models/home_view_model.dart';
-
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
   di.init();
   await SharedPrefHelper.initialize();
   await NotificationHelper.initialize();
-  final a = await AwesomeNotifications().getLocalTimeZoneIdentifier();
-  log(a);
+  //final a = await AwesomeNotifications().getLocalTimeZoneIdentifier();
   await di.injector<LocalDataSource>().openDB();
 
   await SystemChrome.setPreferredOrientations([

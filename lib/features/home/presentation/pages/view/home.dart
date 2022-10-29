@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
 
-   /* Future.wait([
+    /*Future.wait([
      AwesomeNotifications().cancelAllSchedules(),
 
     ]);*/
@@ -57,7 +57,6 @@ class _HomeState extends State<Home> {
       if(scrollController.position.pixels > context.height*0.102){
         return;
       }
-      log(scrollController.position.pixels.toString());
       context.getViewModel<HomeViewModel>().animatedSearchIconInput.add(
           scrollController.position.pixels
       );
@@ -95,7 +94,7 @@ class _HomeState extends State<Home> {
                       pinned: false,
                       backgroundColor: AppColors.bgColor,
                       bottom: PreferredSize(
-                        preferredSize: Size.fromHeight(context.height*0.045),
+                        preferredSize: Size.fromHeight(context.height*0.05),
                         child: SizedBox(
                           width: context.width*0.92,
                           height: context.height * 0.115,
@@ -278,9 +277,26 @@ class _PlantCard extends StatelessWidget {
 
   Future<String> _getWaterTimeDuration() async{
 
-    final notfTime = await AwesomeNotifications().listScheduledNotifications();
-    NotificationModel notfModel = notfTime.firstWhere((element) => element.content!.id==plant.id);
-    log(notfModel.schedule.toString());
+    final notfList = await AwesomeNotifications().listScheduledNotifications();
+
+    if (notfList.isEmpty) {
+      return AppStrings.needWater;
+    }
+
+    NotificationModel? notfModel;
+    for(NotificationModel element in notfList){
+      log((element.content!.id == plant.id).toString());
+      if(element.content!.id == plant.id){
+        notfModel = element;
+        break;
+      }
+    }
+
+    if(notfModel==null){
+      return AppStrings.needWater;
+    }
+
+   // log(notfModel.schedule.toString());
 
     final currentDateTime = DateTime.now();
     final notfDateTime = DateTime(
@@ -293,7 +309,9 @@ class _PlantCard extends StatelessWidget {
 
     final duration = notfDateTime.difference(currentDateTime);
 
-    log("d in minutes " +duration.inMinutes.toString());
+    log("in minutes " +duration.inMinutes.toString());
+    log("in minutes " +duration.inHours.toString());
+    log("in minutes " +duration.inDays.toString());
 
 
     String text = "in ";
@@ -301,17 +319,17 @@ class _PlantCard extends StatelessWidget {
     if(duration.inDays > 0){
 
       if(duration.inDays == 1){
-        text += "${duration.inDays} day";
+        text += "${duration.inDays} day, ${duration.inHours-(duration.inDays*24)} hour";
       }else{
-        text += "${duration.inDays} days";
+        text += "${duration.inDays} days, ${duration.inHours-(duration.inDays*24)} hour";
       }
 
     }else if(duration.inHours > 0){
 
       if(duration.inHours == 1){
-        text += "${duration.inHours} hour";
+        text += "${duration.inHours} hour, ${duration.inMinutes-(duration.inHours*60)} minute";
       }else{
-        text += "${duration.inHours} hours";
+        text += "${duration.inHours} hours, ${duration.inMinutes-(duration.inHours*60)} minute";
       }
 
     }else if(duration.inMinutes > 0 || duration.inSeconds > 0){
@@ -325,7 +343,7 @@ class _PlantCard extends StatelessWidget {
       }
 
     }else{
-      text = AppStrings.needWater;
+     // text = AppStrings.needWater;
     }
 
     log(text.toString());
@@ -336,8 +354,6 @@ class _PlantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = context.width;
     final height = context.height*0.222;
-
-    Future.wait([_getWaterTimeDuration()]);
 
     return Padding(
       padding: EdgeInsets.only(bottom: context.height*0.03),
@@ -392,18 +408,20 @@ class _PlantCard extends StatelessWidget {
 
                       //button
                       SizedBox(
-                        width: width*0.32,
+                        width: width*0.39,
                         height: height*0.19,
                         child: FutureBuilder(
                           future: _getWaterTimeDuration(),
                           builder: (context, duration) {
                             String? text = duration.data;
                             bool needWater = false;
+                            log(text.toString());
 
                             if(text == null){
                               text = "...";
-                            }else{
-                              needWater = duration.data == AppStrings.needWater;
+                            }else if(duration.data == AppStrings.needWater){
+                              text = "need water";
+                              needWater = true;
                             }
 
                             return ElevatedButton(
@@ -419,7 +437,7 @@ class _PlantCard extends StatelessWidget {
                                             children: [
                                               //icon
                                               Expanded(
-                                                flex:1,
+                                                flex:0,
                                                 child: Align(
                                                   alignment:Alignment.centerLeft,
                                                   child: FittedIcon(
@@ -431,19 +449,18 @@ class _PlantCard extends StatelessWidget {
                                                 ),
                                               ),
 
+                                              SizedBox(width: btnSize.maxWidth*0.05,),
+
                                               //text
                                               Expanded(
-                                                  flex:3,
-                                                  child: Align(
-                                                    alignment:Alignment.centerLeft,
-                                                    child: FittedText(
-                                                      width: btnSize.maxWidth*0.74,
-                                                      height: btnSize.maxHeight*0.95,
-                                                      textStyle: getBoldTextStyle(
-                                                          color: needWater?AppColors.white:AppColors.blue
-                                                      ),
-                                                      text:text!,
+                                                  flex:1,
+                                                  child: FittedText(
+                                                    width: btnSize.maxWidth*0.74,
+                                                    height: btnSize.maxHeight*0.97,
+                                                    textStyle: getBoldTextStyle(
+                                                        color: needWater?AppColors.white:AppColors.blue
                                                     ),
+                                                    text:text!,
                                                   )
 
                                               ),

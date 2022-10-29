@@ -9,6 +9,7 @@ class AppStrings {
  static const String waterTime = 'Water Time';
  static const String addPlant = 'Add Plant';
  static const String needWater = 'need water';
+ static const String plantAdded = 'plant added';
 
  static const String day = 'Days';
  static const String hour = 'Hours';

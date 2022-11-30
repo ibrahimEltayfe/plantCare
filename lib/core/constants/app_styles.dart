@@ -8,7 +8,7 @@ TextStyle _getTextStyle(double fontSize, Color color,String fontFamily,FontWeigh
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color,
-      decoration: textDecoration
+      decoration: textDecoration,
   );
 }
 

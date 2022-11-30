@@ -8,18 +8,15 @@ import 'package:lottie/lottie.dart';
 import 'package:plants_care/core/constants/app_colors.dart';
 import 'package:plants_care/core/constants/app_strings.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
-import 'package:plants_care/core/extensions/view_model_provider.dart';
-import 'package:plants_care/core/utils/notification_helper.dart';
-import 'package:plants_care/features/base/view_model_provider.dart';
 import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
 import 'package:plants_care/features/home/presentation/pages/view_models/home_view_model.dart';
+import 'package:provider/provider.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/constants/app_styles.dart';
 import '../../../../reusable_components/fitted_icon.dart';
 import '../../../../reusable_components/fittted_text.dart';
 import '../../../../reusable_components/fractionally_icon.dart';
 import '../../../../reusable_components/fractionally_text.dart';
-import 'package:plants_care/core/utils/injector.dart' as di;
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -42,7 +39,7 @@ class _HomeState extends State<Home> {
     ]);*/
     AwesomeNotifications().setListeners(
       onNotificationDisplayedMethod: (receivedNotification) async{
-        await context.getViewModel<HomeViewModel>().getAllPlants();
+        await context.read<HomeViewModel>().getAllPlants();
       },
       onActionReceivedMethod: (receivedAction) async{
         await AwesomeNotifications().setGlobalBadgeCounter(0);
@@ -57,10 +54,11 @@ class _HomeState extends State<Home> {
       if(scrollController.position.pixels > context.height*0.102){
         return;
       }
-      context.getViewModel<HomeViewModel>().animatedSearchIconInput.add(
+      context.read<HomeViewModel>().animatedSearchIconInput.add(
           scrollController.position.pixels
       );
       });
+
 
     super.initState();
   }
@@ -68,12 +66,13 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     scrollController.dispose();
-    context.getViewModel<HomeViewModel>().dispose();
+    context.read<HomeViewModel>().dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
             padding: EdgeInsets.symmetric(horizontal: context.width*0.034),
             child: Stack(
@@ -109,6 +108,7 @@ class _HomeState extends State<Home> {
                       ) ,
 
                     ),
+                    
 
                     _PlantCardsList(scrollController: scrollController),
                   ],
@@ -136,7 +136,7 @@ class _ParallaxSearchIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
+      stream: context.read<HomeViewModel>().animatedSearchIconOutput,
       builder: (ctx,AsyncSnapshot<double> snapshot){
         double? val = snapshot.data;
 
@@ -160,7 +160,7 @@ class _ParallaxSearchIcon extends StatelessWidget {
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.ease
               ).whenComplete((){
-                context.getViewModel<HomeViewModel>().searchFieldRequestFocus();
+                context.read<HomeViewModel>().searchFieldRequestFocus();
               });
             },
             child: FittedIcon(
@@ -232,11 +232,11 @@ class _SearchBar extends StatelessWidget {
             expands: true,
             maxLines: null,
             style: getRegularTextStyle(),
-            focusNode: context.getViewModel<HomeViewModel>().focusNode,
+            focusNode: context.read<HomeViewModel>().focusNode,
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               suffixIcon: StreamBuilder(
-                  stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
+                  stream: context.read<HomeViewModel>().animatedSearchIconOutput,
                   builder: (context,AsyncSnapshot<double> snapshot) {
                     if(snapshot.data == null || snapshot.data! <= 3){
                       return const FractionallyIcon(
@@ -285,7 +285,6 @@ class _PlantCard extends StatelessWidget {
 
     NotificationModel? notfModel;
     for(NotificationModel element in notfList){
-      log((element.content!.id == plant.id).toString());
       if(element.content!.id == plant.id){
         notfModel = element;
         break;
@@ -296,15 +295,14 @@ class _PlantCard extends StatelessWidget {
       return AppStrings.needWater;
     }
 
-   // log(notfModel.schedule.toString());
-
     final currentDateTime = DateTime.now();
+    final schedule = notfModel.schedule!.toMap();
     final notfDateTime = DateTime(
-        notfModel.schedule!.toMap()["year"],
-        notfModel.schedule!.toMap()["month"],
-        notfModel.schedule!.toMap()["day"],
-        notfModel.schedule!.toMap()["hour"],
-        notfModel.schedule!.toMap()["minute"]
+        schedule["year"],
+        schedule["month"],
+        schedule["day"],
+        schedule["hour"],
+        schedule["minute"]
     );
 
     final duration = notfDateTime.difference(currentDateTime);
@@ -346,7 +344,6 @@ class _PlantCard extends StatelessWidget {
      // text = AppStrings.needWater;
     }
 
-    log(text.toString());
     return text;
   }
 
@@ -372,125 +369,130 @@ class _PlantCard extends StatelessWidget {
             ]
         ),
         padding: EdgeInsets.symmetric(horizontal: context.width*0.032,vertical: context.height*0.025),
-        child: Row(
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Expanded(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: width*0.7,
-                  height: height,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      //name
-                      FittedText(
-                        height: height*0.12,
-                        width:width*0.7,
-                        alignment: Alignment.centerLeft,
-                        textStyle: getBoldTextStyle(),
-                        text: plant.plantName ?? "...",
-                      ),
+            Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: SizedBox(
+                      width: width*0.7,
+                      height: height,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //name
+                          Text(
+                            plant.plantName ?? "...",
+                            style: getBoldTextStyle(
+                                fontSize: context.height*0.022
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
 
-                      SizedBox(height: height*0.012,),
+                          SizedBox(height: height*0.012,),
 
-                      //desc
-                      FittedText(
-                          height: height*0.1,
-                          width:width*0.7,
-                          text: 'Item Place ...',
-                          alignment: Alignment.centerLeft,
-                          textStyle: getRegularTextStyle()
-                      ),
+                          //desc
+                          /*FittedText(
+                              height: height*0.1,
+                              width:width*0.7,
+                              text: 'Item Place ...',
+                              alignment: Alignment.centerLeft,
+                              textStyle: getRegularTextStyle()
+                          ),*/
 
-                      const Spacer(),
+                          const Spacer(),
 
-                      //button
-                      SizedBox(
-                        width: width*0.39,
-                        height: height*0.19,
-                        child: FutureBuilder(
-                          future: _getWaterTimeDuration(),
-                          builder: (context, duration) {
-                            String? text = duration.data;
-                            bool needWater = false;
-                            log(text.toString());
+                          //button
+                          SizedBox(
+                            width: width*0.39,
+                            height: height*0.19,
+                            child: FutureBuilder(
+                              future: _getWaterTimeDuration(),
+                              builder: (context, duration) {
+                                String? text = duration.data;
+                                bool needWater = false;
+                                log(text.toString());
 
-                            if(text == null){
-                              text = "...";
-                            }else if(duration.data == AppStrings.needWater){
-                              text = "need water";
-                              needWater = true;
-                            }
+                                if(text == null){
+                                  text = "...";
+                                }else if(duration.data == AppStrings.needWater){
+                                  text = "need water";
+                                  needWater = true;
+                                }
 
-                            return ElevatedButton(
-                                onPressed: (){},
-                                style: getRegularButtonStyle(
-                                    bgColor:needWater?AppColors.lightRed:AppColors.lightBlue,
-                                    radius: 15
-                                ),
-                                child: LayoutBuilder(
-                                    builder: (context,btnSize) {
-                                          return Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              //icon
-                                              Expanded(
-                                                flex:0,
-                                                child: Align(
-                                                  alignment:Alignment.centerLeft,
-                                                  child: FittedIcon(
-                                                    width: btnSize.maxWidth*0.12,
-                                                    height:  btnSize.maxHeight*0.7,
-                                                    color: AppColors.blue,
-                                                    icon: AppIcons.waterDrop,
-                                                  ),
-                                                ),
-                                              ),
-
-                                              SizedBox(width: btnSize.maxWidth*0.05,),
-
-                                              //text
-                                              Expanded(
-                                                  flex:1,
-                                                  child: FittedText(
-                                                    width: btnSize.maxWidth*0.74,
-                                                    height: btnSize.maxHeight*0.97,
-                                                    textStyle: getBoldTextStyle(
-                                                        color: needWater?AppColors.white:AppColors.blue
+                                return ElevatedButton(
+                                    onPressed: (){},
+                                    style: getRegularButtonStyle(
+                                        bgColor:needWater?AppColors.lightRed:AppColors.lightBlue,
+                                        radius: 15
+                                    ),
+                                    child: LayoutBuilder(
+                                        builder: (context,btnSize) {
+                                              return Row(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  //icon
+                                                  Expanded(
+                                                    flex:0,
+                                                    child: Align(
+                                                      alignment:Alignment.centerLeft,
+                                                      child: FittedIcon(
+                                                        width: btnSize.maxWidth*0.12,
+                                                        height:  btnSize.maxHeight*0.7,
+                                                        color: AppColors.blue,
+                                                        icon: AppIcons.waterDrop,
+                                                      ),
                                                     ),
-                                                    text:text!,
-                                                  )
+                                                  ),
 
-                                              ),
-                                            ],
-                                          );
-                                    }
-                                )
-                            );
-                          },
-                        )
+                                                  SizedBox(width: btnSize.maxWidth*0.05,),
+
+                                                  //text
+                                                  Expanded(
+                                                      flex:1,
+                                                      child: FittedText(
+                                                        width: btnSize.maxWidth*0.74,
+                                                        height: btnSize.maxHeight*0.97,
+                                                        textStyle: getBoldTextStyle(
+                                                            color: needWater?AppColors.white:AppColors.blue
+                                                        ),
+                                                        text:text!,
+                                                      )
+
+                                                  ),
+                                                ],
+                                              );
+                                        }
+                                    )
+                                );
+                              },
+                            )
+                          ),
+
+                        ],
                       ),
-
-                    ],
+                    ),
                   ),
                 ),
-              ),
+
+                SizedBox(width: width*0.005,),
+              ],
             ),
 
-            SizedBox(width: width*0.005,),
-
-            //image
-            Expanded(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: SizedBox(
-                    width: width*0.3,
+            Positioned(
+                right: -width*0.03,
+                bottom: -height*0.115,
+                child: //image
+                SizedBox(
+                    width: width*0.36,
                     height: height,
-                    child: Placeholder()
-                ),
-              ),
+                    child: Image.asset('assets/images/plant.png',fit: BoxFit.cover,)
+                )
             )
           ],
         ),
@@ -506,7 +508,7 @@ class _PlantCardsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: context.getViewModel<HomeViewModel>().plantsOutput,
+        stream: context.read<HomeViewModel>().plantsOutput,
         builder: (context, snapshot){
           if(snapshot.connectionState == ConnectionState.waiting || snapshot.data == null ){
             return const SliverToBoxAdapter(
@@ -525,6 +527,7 @@ class _PlantCardsList extends StatelessWidget {
 
           } else {
             return SliverFixedExtentList(
+
               delegate: SliverChildBuilderDelegate(
                  (_, int i) {
                   return _PlantCard(plant:snapshot.data![i]);

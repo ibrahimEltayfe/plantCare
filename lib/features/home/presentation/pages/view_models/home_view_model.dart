@@ -19,7 +19,7 @@ class HomeViewModel extends BaseViewModel with HomeViewModelInputs,HomeViewModel
   StreamController<double> animatedSearchIconController = StreamController.broadcast();
   StreamController<FocusNode> searchFieldFocusNodeController = StreamController();
   StreamController<List<PlantEntity>> plantsController = StreamController();
-  StreamController<bool> addPlantLoadingController = StreamController();
+  StreamController<bool> addPlantLoadingController = StreamController.broadcast();
 
   //public functions
   @override

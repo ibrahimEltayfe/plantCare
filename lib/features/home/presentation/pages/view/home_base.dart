@@ -9,6 +9,7 @@ import 'package:plants_care/core/utils/notification_helper.dart';
 import 'package:plants_care/features/base/view_model_provider.dart';
 import 'package:plants_care/features/home/presentation/pages/view/home.dart';
 import 'package:plants_care/features/home/presentation/pages/view/widgets/bottom_sheet.dart';
+import 'package:provider/provider.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../reusable_components/fractionally_icon.dart';
 import '../view_models/home_view_model.dart';
@@ -38,43 +39,43 @@ class _HomeBasePageState extends State<HomeBasePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelProvider(
-      viewModel: di.injector<HomeViewModel>()..start()..getAllPlants(),
-
+    return Provider(
+      create: (_)=>di.injector<HomeViewModel>()..start()..getAllPlants(),
       child: Scaffold(
-        backgroundColor: AppColors.bgColor,
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: const _FloatingActionButton(),
+          backgroundColor: AppColors.bgColor,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+          floatingActionButton: const _FloatingActionButton(),
 
-        bottomNavigationBar: _BottomNavBar(
-          icons:const [
-            AppIcons.plant,
-            AppIcons.settings,
-          ],
-          texts:const [
-            "Plants",
-            "Settings",
-          ],
-          activeColor: AppColors.primaryColor,
-          disabledColor: AppColors.grey,
-          currentIndex:currentIndex,
-          onTap: (i) {
-            setState(() {
-              currentIndex = i;
-            });
-          },
-        ),
-        body: SafeArea(
-          child: IndexedStack(
-            index: 0,
-
-            children: [
-              Home()
+          bottomNavigationBar: _BottomNavBar(
+            icons:const [
+              AppIcons.plant,
+              AppIcons.settings,
             ],
+            texts:const [
+              "Plants",
+              "Settings",
+            ],
+            activeColor: AppColors.primaryColor,
+            disabledColor: AppColors.grey,
+            currentIndex:currentIndex,
+            onTap: (i) {
+              setState(() {
+                currentIndex = i;
+              });
+            },
+          ),
+          body: SafeArea(
+            child: IndexedStack(
+              index: 0,
+
+              children: [
+                Home()
+              ],
+            ),
           ),
         ),
-      ),
     );
+
   }
 }
 
@@ -96,7 +97,10 @@ class _FloatingActionButton extends StatelessWidget {
               )
           ),
           builder: (ctx) {
-            return BottomSheetContent(homeViewModel: context.getViewModel<HomeViewModel>(),);
+            return Provider.value(
+                value: context.read<HomeViewModel>(),
+                child: BottomSheetContent()
+            );
           },
         );
       },

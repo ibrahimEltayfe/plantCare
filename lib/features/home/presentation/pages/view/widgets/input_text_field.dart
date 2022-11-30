@@ -74,6 +74,10 @@ class InputTextField extends StatelessWidget {
                 borderSide: BorderSide.none
             ),
 
+            focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: AppColors.darkRed)
+            ),
             errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: AppColors.darkRed)

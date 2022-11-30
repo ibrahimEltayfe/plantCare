@@ -10,6 +10,7 @@ import 'package:plants_care/features/home/data/models/plant_model.dart';
 import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
 import 'package:plants_care/features/home/presentation/pages/view_models/home_view_model.dart';
 import 'package:plants_care/features/reusable_components/fittted_text.dart';
+import 'package:provider/provider.dart';
 import '../../../../../../core/constants/app_colors.dart';
 import '../../../../../../core/constants/app_strings.dart';
 import '../../../../../../core/constants/app_styles.dart';
@@ -17,8 +18,7 @@ import '../../../../../../core/utils/notification_helper.dart';
 import 'input_text_field.dart';
 
 class BottomSheetContent extends StatefulWidget {
-  final HomeViewModel homeViewModel;
-  const BottomSheetContent({super.key, required this.homeViewModel});
+  const BottomSheetContent({super.key});
 
   @override
   State<BottomSheetContent> createState() => _BottomSheetContentState();
@@ -37,7 +37,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     dayController = TextEditingController();
     hourController = TextEditingController();
     minuteController = TextEditingController();
-    widget.homeViewModel.addPlantLoadingInput.add(false);
+    //widget.homeViewModel.addPlantLoadingInput.add(false);
+   // context.getViewModel<HomeViewModel>().addPlantLoadingInput.add(false);
     super.initState();
   }
 
@@ -55,7 +56,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     return Form(
       key: formKey,
       child: Container(
-        height: context.height*0.44,
+        height: context.height*0.44 + MediaQuery.of(context).viewInsets.bottom,
         width: context.width,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.only(
@@ -94,8 +95,8 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
 
               SizedBox(height: context.height*0.045,),
               _AddPlantButton(
-                homeViewModel: widget.homeViewModel,
                 onTap: () async{
+
                   if(formKey.currentState!.validate()){
 
                     final DateTime waterTime = DateTime.now().add(
@@ -112,11 +113,16 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
                         waterTime: waterTime.millisecondsSinceEpoch
                     );
 
-                    await widget.homeViewModel.addPlant(plantModel);
+                    await context.read<HomeViewModel>().addPlant(plantModel);
+
+                    plantNameController.clear();
+                    dayController.clear();
+                    hourController.clear();
+                    minuteController.clear();
 
                   }
                 },
-              )
+              ),
 
             ],
           ),
@@ -129,8 +135,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
 /* Add Plant Button */
 class _AddPlantButton extends StatelessWidget {
   final VoidCallback onTap;
-  final HomeViewModel homeViewModel;
-  const _AddPlantButton({Key? key, required this.onTap, required this.homeViewModel}) : super(key: key);
+  const _AddPlantButton({Key? key, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -141,10 +146,10 @@ class _AddPlantButton extends StatelessWidget {
           style: getRegularButtonStyle(bgColor: AppColors.primaryColor, radius: 15),
           onPressed: onTap,
           child: StreamBuilder(
-            stream: homeViewModel.addPlantLoadingOutput,
+            stream: context.read<HomeViewModel>().addPlantLoadingOutput,
             builder: (context, snapshot) {
               log(snapshot.data.toString());
-              if(snapshot.data == null || snapshot.data == true){
+              if(snapshot.data == true){
                 return const Center(child: CircularProgressIndicator(color: AppColors.white,));
               }
                 return FittedText(
@@ -208,6 +213,10 @@ class _BuildReminderTimeFields extends StatelessWidget {
                   return "Value can not be empty";
                 }
 
+                if(int.tryParse(value)==null){
+                  return "it is not a number";
+                }
+
                   return null;
               },
             ),
@@ -226,6 +235,9 @@ class _BuildReminderTimeFields extends StatelessWidget {
               validator: (value){
                 if(value == null || value.trim() == "") {
                   return "Value can not be empty";
+                }
+                if(int.tryParse(value)==null){
+                  return "it is not a number";
                 }
 
                 return null;
@@ -246,6 +258,9 @@ class _BuildReminderTimeFields extends StatelessWidget {
               validator: (value){
                 if(value == null || value.trim() == "") {
                   return "Value can not be empty";
+                }
+                if(int.tryParse(value)==null){
+                  return "it is not a number";
                 }
 
                 if(int.parse(value) <= 0

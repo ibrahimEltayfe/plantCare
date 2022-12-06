@@ -21,4 +21,7 @@ class AppColors{
 
   static const Color darkRed = Color(0xFFAC0000);
   static const Color lightRed = Color(0xFFff8886);
+
+  static const Color green = Colors.green;
+
 }

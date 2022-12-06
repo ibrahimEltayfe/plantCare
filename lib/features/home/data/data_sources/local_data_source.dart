@@ -1,8 +1,11 @@
 import 'dart:developer';
-
 import 'package:plants_care/features/home/data/models/plant_model.dart';
-import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:sqflite/sqflite.dart';
+
+final localDataSourceProvider = Provider<LocalDataSource>((ref) {
+  return LocalDataSource();
+});
 
 class LocalDataSource{
   final String  _dbName = 'plants_database';
@@ -40,13 +43,13 @@ class LocalDataSource{
     return list;
   }
 
-  Future<int> updateDB(PlantEntity plantEntity) async{
+  Future<int> updateDB(PlantModel plantModel) async{
     return await database.rawUpdate(
         'UPDATE $_plantsTable SET id = ?, plantName = ? WHERE waterTime = ?',
         [
-          plantEntity.id,
-          plantEntity.plantName,
-          plantEntity.waterTime
+          plantModel.id,
+          plantModel.plantName,
+          plantModel.waterTime
         ]);
 
   }

@@ -1,41 +1,40 @@
 import 'dart:developer';
 import 'package:dartz/dartz.dart';
-import 'package:plants_care/core/constants/app_errors.dart';
 import 'package:plants_care/core/error/exception_handler.dart';
 import 'package:plants_care/features/home/data/data_sources/local_data_source.dart';
-import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
-import 'package:plants_care/features/home/domain/repositories/local_db_repository.dart';
+import 'package:riverpod/riverpod.dart';
 import '../../../../core/error/failures.dart';
 import '../models/plant_model.dart';
 
-class LocalPlantsRepositoryImpl extends LocalPlantsRepository{
-  final LocalDataSource localDataSource;
-  LocalPlantsRepositoryImpl(this.localDataSource);
+final localPlantsRepositoryProvider = Provider<LocalPlantsRepository>((ref) {
+  final localDataSource = ref.read(localDataSourceProvider);
+  return LocalPlantsRepository(localDataSource);
+});
 
-  @override
+class LocalPlantsRepository{
+  final LocalDataSource localDataSource;
+  LocalPlantsRepository(this.localDataSource);
+
   Future<Either<Failure,int>> deleteRecord(String id) {
     return _handleFailures<int>(() async{
       return await localDataSource.deleteRecord(id);
     });
   }
 
-  @override
   Future<Either<Failure,int>> insertRecord(PlantModel plantModel) async{
     return _handleFailures<int>(() async{
       return await localDataSource.insertToDB(plantModel);
     });
   }
 
-  @override
-  Future<Either<Failure,int>> updateRecord(PlantEntity plantEntity) {
+  Future<Either<Failure,int>> updateRecord(PlantModel plantModel) {
     return _handleFailures<int>(() async{
-       return await localDataSource.updateDB(plantEntity);
+       return await localDataSource.updateDB(plantModel);
     });
   }
 
-  @override
-  Future<Either<Failure,List<PlantEntity>>> getAllRecords() async{
-    return _handleFailures<List<PlantEntity>>(() async{
+  Future<Either<Failure,List<PlantModel>>> getAllRecords() async{
+    return _handleFailures<List<PlantModel>>(() async{
       final List<Map<String,dynamic>> list = await localDataSource.getAllRecords();
       return list.map((e) => PlantModel.fromJson(e)).toList();
     });

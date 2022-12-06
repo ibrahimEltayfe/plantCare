@@ -23,6 +23,11 @@ dependencies:
   get_it: ^7.2.0
   dartz: ^0.10.1
   auto_size_text: ^3.0.0
+  equatable: ^2.0.5
+  flutter_hooks: ^0.18.0
+  hooks_riverpod: ^2.1.1
+  responsive_framework: ^0.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

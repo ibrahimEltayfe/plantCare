@@ -3,15 +3,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:plants_care/core/constants/app_icons.dart';
 import 'package:plants_care/core/constants/app_styles.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
-import 'package:plants_care/core/extensions/view_model_provider.dart';
-import 'package:plants_care/core/utils/injector.dart' as di;
 import 'package:plants_care/core/utils/notification_helper.dart';
-import 'package:plants_care/features/base/view_model_provider.dart';
-import 'package:plants_care/features/home/presentation/pages/view/home.dart';
-import 'package:plants_care/features/home/presentation/pages/view/widgets/bottom_sheet.dart';
+import 'package:plants_care/features/home/presentation/view/home.dart';
+import 'package:plants_care/features/home/presentation/view/widgets/bottom_sheet.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../reusable_components/fractionally_icon.dart';
-import '../view_models/home_view_model.dart';
+import '../../../reusable_components/fractionally_icon.dart';
+
 
 class HomeBasePage extends StatefulWidget {
   const HomeBasePage({Key? key}) : super(key: key);
@@ -38,10 +35,7 @@ class _HomeBasePageState extends State<HomeBasePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelProvider(
-      viewModel: di.injector<HomeViewModel>()..start()..getAllPlants(),
-
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.bgColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         floatingActionButton: const _FloatingActionButton(),
@@ -73,8 +67,8 @@ class _HomeBasePageState extends State<HomeBasePage> {
             ],
           ),
         ),
-      ),
-    );
+      );
+
   }
 }
 
@@ -96,7 +90,7 @@ class _FloatingActionButton extends StatelessWidget {
               )
           ),
           builder: (ctx) {
-            return BottomSheetContent(homeViewModel: context.getViewModel<HomeViewModel>(),);
+            return BottomSheetContent();
           },
         );
       },

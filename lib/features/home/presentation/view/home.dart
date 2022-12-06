@@ -1,80 +1,55 @@
 import 'dart:developer';
-import 'dart:io';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:plants_care/core/constants/app_colors.dart';
 import 'package:plants_care/core/constants/app_strings.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
-import 'package:plants_care/core/extensions/view_model_provider.dart';
-import 'package:plants_care/core/utils/notification_helper.dart';
-import 'package:plants_care/features/base/view_model_provider.dart';
-import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
-import 'package:plants_care/features/home/presentation/pages/view_models/home_view_model.dart';
+import 'package:plants_care/features/home/data/models/plant_model.dart';
+import 'package:plants_care/features/home/presentation/provider/get_plants/get_plants_provider.dart';
+import 'package:plants_care/features/home/presentation/provider/home_provider.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/constants/app_styles.dart';
-import '../../../../reusable_components/fitted_icon.dart';
-import '../../../../reusable_components/fittted_text.dart';
-import '../../../../reusable_components/fractionally_icon.dart';
-import '../../../../reusable_components/fractionally_text.dart';
-import 'package:plants_care/core/utils/injector.dart' as di;
+import '../../../reusable_components/fitted_icon.dart';
+import '../../../reusable_components/fittted_text.dart';
+import '../../../reusable_components/fractionally_icon.dart';
+import '../../../reusable_components/fractionally_text.dart';
 
-class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
 
-  @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  final ScrollController scrollController = ScrollController();
-  final FocusNode focusNode = FocusNode();
-
+class Home extends HookConsumerWidget {
+  Home({super.key});
 
   @override
-  void initState() {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeRef = ref.watch(homeProvider);
 
-   /* Future.wait([
-     AwesomeNotifications().cancelAllSchedules(),
+    final ScrollController scrollController = useScrollController();
 
-    ]);*/
-    AwesomeNotifications().setListeners(
-      onNotificationDisplayedMethod: (receivedNotification) async{
-        await context.getViewModel<HomeViewModel>().getAllPlants();
-      },
-      onActionReceivedMethod: (receivedAction) async{
-        await AwesomeNotifications().setGlobalBadgeCounter(0);
-      },
-      onDismissActionReceivedMethod: (receivedAction) async{
-        await AwesomeNotifications().setGlobalBadgeCounter(0);
-      },
-    );
+    useEffect((){
+      homeRef.handleNotifications();
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        ref.read(getPlantsProvider.notifier).getAllPlants();
+      });
+    }, const []);
 
-    //scroll to searchBar
-    scrollController.addListener(() {
-      if(scrollController.position.pixels > context.height*0.102){
-        return;
-      }
-      log(scrollController.position.pixels.toString());
-      context.getViewModel<HomeViewModel>().animatedSearchIconInput.add(
-          scrollController.position.pixels
-      );
+    useEffect(() {
+      scrollController.addListener(() {
+        if(scrollController.position.pixels > context.height*0.102){
+          return;
+        }
+        log(scrollController.position.pixels.toString());
+        homeRef.animatedSearchIconInput.add(
+            scrollController.position.pixels
+        );
       });
 
-    super.initState();
-  }
+      return () => scrollController.removeListener(() { });
+    }, [scrollController]);
 
-  @override
-  void dispose() {
-    scrollController.dispose();
-    context.getViewModel<HomeViewModel>().dispose();
-    super.dispose();
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Padding(
             padding: EdgeInsets.symmetric(horizontal: context.width*0.034),
             child: Stack(
@@ -129,15 +104,16 @@ class _HomeState extends State<Home> {
   }
 }
 
-
-class _ParallaxSearchIcon extends StatelessWidget {
+class _ParallaxSearchIcon extends ConsumerWidget {
   final ScrollController scrollController;
   const _ParallaxSearchIcon({Key? key, required this.scrollController}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeRef = ref.read(homeProvider);
+
     return StreamBuilder(
-      stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
+      stream: homeRef.animatedSearchIconOutput,
       builder: (ctx,AsyncSnapshot<double> snapshot){
         double? val = snapshot.data;
 
@@ -155,14 +131,8 @@ class _ParallaxSearchIcon extends StatelessWidget {
           top: top,
           right: right,
           child: GestureDetector(
-            onTap: () {
-              scrollController.animateTo(
-                  0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.ease
-              ).whenComplete((){
-                context.getViewModel<HomeViewModel>().searchFieldRequestFocus();
-              });
+            onTap: (){
+              //todo:navigate to search page
             },
             child: FittedIcon(
               width: context.width*0.104,
@@ -210,11 +180,13 @@ class PersistenceHeader extends SliverPersistentHeaderDelegate{
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerWidget {
   const _SearchBar({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeRef = ref.watch(homeProvider);
+
     return Expanded(
       child: Container(
           decoration: BoxDecoration(
@@ -233,11 +205,10 @@ class _SearchBar extends StatelessWidget {
             expands: true,
             maxLines: null,
             style: getRegularTextStyle(),
-            focusNode: context.getViewModel<HomeViewModel>().focusNode,
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               suffixIcon: StreamBuilder(
-                  stream: context.getViewModel<HomeViewModel>().animatedSearchIconOutput,
+                  stream: homeRef.animatedSearchIconOutput,
                   builder: (context,AsyncSnapshot<double> snapshot) {
                     if(snapshot.data == null || snapshot.data! <= 3){
                       return const FractionallyIcon(
@@ -272,72 +243,17 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class _PlantCard extends StatelessWidget {
-  final PlantEntity plant;
+class _PlantCard extends ConsumerWidget {
+  final PlantModel plant;
   const _PlantCard({Key? key, required this.plant}) : super(key: key);
 
-  Future<String> _getWaterTimeDuration() async{
-
-    final notfTime = await AwesomeNotifications().listScheduledNotifications();
-    NotificationModel notfModel = notfTime.firstWhere((element) => element.content!.id==plant.id);
-    log(notfModel.schedule.toString());
-
-    final currentDateTime = DateTime.now();
-    final notfDateTime = DateTime(
-        notfModel.schedule!.toMap()["year"],
-        notfModel.schedule!.toMap()["month"],
-        notfModel.schedule!.toMap()["day"],
-        notfModel.schedule!.toMap()["hour"],
-        notfModel.schedule!.toMap()["minute"]
-    );
-
-    final duration = notfDateTime.difference(currentDateTime);
-
-    log("d in minutes " +duration.inMinutes.toString());
-
-
-    String text = "in ";
-
-    if(duration.inDays > 0){
-
-      if(duration.inDays == 1){
-        text += "${duration.inDays} day";
-      }else{
-        text += "${duration.inDays} days";
-      }
-
-    }else if(duration.inHours > 0){
-
-      if(duration.inHours == 1){
-        text += "${duration.inHours} hour";
-      }else{
-        text += "${duration.inHours} hours";
-      }
-
-    }else if(duration.inMinutes > 0 || duration.inSeconds > 0){
-
-      if(duration.inMinutes == 1){
-        text += "${duration.inMinutes} minute";
-      }else if(duration.inMinutes > 0){
-        text += "${duration.inMinutes} minutes";
-      }else if(duration.inSeconds > 0){
-        text = "less than minute";
-      }
-
-    }else{
-      text = AppStrings.needWater;
-    }
-
-    log(text.toString());
-    return text;
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final width = context.width;
     final height = context.height*0.222;
 
-    Future.wait([_getWaterTimeDuration()]);
+
+    final homeRef = ref.watch(homeProvider);
 
     return Padding(
       padding: EdgeInsets.only(bottom: context.height*0.03),
@@ -395,8 +311,9 @@ class _PlantCard extends StatelessWidget {
                         width: width*0.32,
                         height: height*0.19,
                         child: FutureBuilder(
-                          future: _getWaterTimeDuration(),
+                          future: homeRef.getWaterTimeDuration(plant.id ?? -1),
                           builder: (context, duration) {
+                            log(duration.data.toString());
                             String? text = duration.data;
                             bool needWater = false;
 
@@ -482,42 +399,44 @@ class _PlantCard extends StatelessWidget {
   }
 }
 
-class _PlantCardsList extends StatelessWidget {
+class _PlantCardsList extends ConsumerWidget{
   final ScrollController scrollController;
   const _PlantCardsList({super.key, required this.scrollController});
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: context.getViewModel<HomeViewModel>().plantsOutput,
-        builder: (context, snapshot){
-          if(snapshot.connectionState == ConnectionState.waiting || snapshot.data == null ){
-            return const SliverToBoxAdapter(
-              child: Center(child: CircularProgressIndicator(),),
-            );
-          }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final getPlantsState = ref.watch(getPlantsProvider);
 
-          if(snapshot.data!.isEmpty){
-            return SliverToBoxAdapter(
-              child: Center(child:Text('No Data',style: getBoldTextStyle(),)),
-            );
-          }else if(snapshot.hasError){
-            return SliverToBoxAdapter(
-              child: Center(child:Text(snapshot.error.toString(),style: getBoldTextStyle(),))
-            );
+    if(getPlantsState is GetPlantsLoading){
 
-          } else {
-            return SliverFixedExtentList(
-              delegate: SliverChildBuilderDelegate(
-                 (_, int i) {
-                  return _PlantCard(plant:snapshot.data![i]);
-                },
-                childCount: snapshot.data!.length,
-              ), itemExtent: context.height * 0.255,
-            );
-          }
+      return SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: AppColors.primaryColor,),));
+
+    }else if(getPlantsState is GetPlantsError){
+
+      return SliverToBoxAdapter(child: Center(child: Text(getPlantsState.message),));
+
+    }else if(getPlantsState is GetPlantsDataFetched){
+
+      if(getPlantsState.plants.isEmpty){
+        return SliverToBoxAdapter(
+          child: Center(child:Text('No Data',style: getBoldTextStyle(),)),
+        );
       }
-    );
+
+      return SliverFixedExtentList(
+        delegate: SliverChildBuilderDelegate(
+           (_, int i) {
+            return _PlantCard(plant:getPlantsState.plants[i]);
+          },
+          childCount: getPlantsState.plants.length,
+        ),
+
+        itemExtent: context.height * 0.255,
+      );
+
+    }
+
+    return SliverToBoxAdapter(child: const SizedBox.shrink());
   }
 }
 
@@ -527,6 +446,7 @@ class _BirdLottie extends StatefulWidget {
   @override
   State<_BirdLottie> createState() => _BirdLottieState();
 }
+
 class _BirdLottieState extends State<_BirdLottie> with SingleTickerProviderStateMixin{
   late final AnimationController _animationController;
 
@@ -537,6 +457,12 @@ class _BirdLottieState extends State<_BirdLottie> with SingleTickerProviderState
         duration: const Duration(seconds: 5)
     )..forward();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override

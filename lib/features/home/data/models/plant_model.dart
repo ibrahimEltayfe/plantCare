@@ -1,7 +1,9 @@
-import 'package:plants_care/features/home/domain/entities/plant_entity.dart';
+class PlantModel{
+  int? id;
+  String? plantName;
+  int? waterTime;
 
-class PlantModel extends PlantEntity{
-  PlantModel({required super.id, required super.plantName, required super.waterTime});
+  PlantModel({required this.id, required this.plantName, required this.waterTime});
 
   Map<String,dynamic> toMap(){
     return {

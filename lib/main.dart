@@ -1,32 +1,36 @@
 import 'dart:developer';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:plants_care/core/utils/injector.dart' as di;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plants_care/core/utils/notification_helper.dart';
 import 'package:plants_care/core/utils/shared_pref_helper.dart';
-import 'package:plants_care/features/base/view_model_provider.dart';
-import 'package:plants_care/features/home/data/data_sources/local_data_source.dart';
-import 'package:plants_care/features/home/presentation/pages/view/home_base.dart';
+import 'package:plants_care/features/home/presentation/view/home_base.dart';
 
-import 'features/home/presentation/pages/view_models/home_view_model.dart';
+import 'features/home/data/data_sources/local_data_source.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
-  di.init();
   await SharedPrefHelper.initialize();
   await NotificationHelper.initialize();
+
+  final container = ProviderContainer();
+  await container.read( localDataSourceProvider).openDB();
+
   final a = await AwesomeNotifications().getLocalTimeZoneIdentifier();
   log(a);
-  await di.injector<LocalDataSource>().openDB();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
-  runApp(const MyApp());
+  runApp(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MyApp()
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {

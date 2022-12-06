@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:plants_care/core/extensions/size_config.dart';
-import 'package:plants_care/core/extensions/view_model_provider.dart';
 import '../../../../../../core/constants/app_colors.dart';
-import '../../../../../../core/constants/app_strings.dart';
 import '../../../../../../core/constants/app_styles.dart';
-import '../../../../../reusable_components/fractionally_icon.dart';
+import '../../../../reusable_components/fractionally_icon.dart';
 
 class InputTextField extends StatelessWidget {
   final String hint;
@@ -72,6 +70,11 @@ class InputTextField extends StatelessWidget {
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide.none
+            ),
+
+            focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: AppColors.darkRed)
             ),
 
             errorBorder: OutlineInputBorder(
